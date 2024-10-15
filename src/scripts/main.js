@@ -8,38 +8,42 @@ const listEmployees = document.querySelector('ul');
 function getSalary(element) {
   const salary = element.dataset.salary;
 
-  if (salary) {
-    let cleanedSalary = salary.slice(1);
-
-    cleanedSalary = cleanedSalary.split(',').join('');
-
-    return Number(cleanedSalary);
+  if (!salary) {
+    throw new Error(`Salary not found for employee: ${element.textContent}`);
   }
 
-  return 0;
+  const cleanedSalary = salary.substring(1).replace(',', '');
+  const numericSalary = Number(cleanedSalary);
+
+  if (isNaN(numericSalary)) {
+    throw new Error(`Invalid salary format for employee:
+      ${element.textContent}`);
+  }
+
+  return numericSalary;
 }
 
 function sortList(list) {
-  const listItem = [...list];
+  const listItem = Array.from(list);
 
-  return listItem.sort((a, b) => getSalary(b) - getSalary(a));
+  const sortedList = listItem.slice().sort((a, b) => {
+    return getSalary(b) - getSalary(a);
+  });
+
+  listEmployees.innerHTML = '';
+
+  sortedList.forEach((element) => {
+    listEmployees.appendChild(element);
+  });
 }
 
-listEmployees.innerHTML = '';
-
-const sortedList = sortList(employees);
-
-sortedList.forEach((element) => {
-  listEmployees.appendChild(element);
-});
-
 function getEmployees(employeesList) {
-  const emplArr = [...employeesList];
+  const emplArr = Array.from(employeesList);
 
   return emplArr.map((element) => {
     const nameElement = element.textContent.trim();
-    const salary = element.dataset.salary;
     const position = element.dataset.position;
+    const salary = element.dataset.salary;
     const age = element.dataset.age;
 
     return {
@@ -51,4 +55,5 @@ function getEmployees(employeesList) {
   });
 }
 
+sortList(employees);
 getEmployees(employees);
